@@ -276,7 +276,7 @@ if __name__ == "__main__":
     # set intervals
     A, B = -4, 4
     # set number of points to generate
-    N = 10
+    N = 100
 
     # generate some data to be fit
     x, y, weights = gen_data(A, B, N, degree=4)

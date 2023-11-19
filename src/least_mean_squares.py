@@ -244,7 +244,7 @@ def plot_fit(
     # since weights[0] is the constant and weights[n] is the coefficient for degree n
 
     # add r squared value in legend
-    r_squared = calc_r2(weight_vector, dataset)
+    r_squared = calc_r2(lms_weights, dataset)
     r_squared = np.round(r_squared, 3)
 
     # R^2 is added to the polynomial label. the text is made smaller by using the ^ latex format

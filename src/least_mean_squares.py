@@ -114,6 +114,54 @@ def lms(data: list, degree: int) -> np.ndarray:
     return weights
 
 
+def multivar_linear_regression(data: list) -> np.ndarray:
+    """
+    Multivariate linear regression algorithm. Returns weights of the best fit to the data
+
+    ## Parameters
+    `data` : list
+        a list of the datapoints to be fit
+
+    ## Returns
+    `weights` : np.ndarray
+        array of weights that describe the line of best fit
+
+    """
+
+    # TODO: validate that the data has the correct dimensions to avoid singular matrix error
+    # TODO: generate some random n-dimensional data with noise
+    # and validate the data using sklearn.linear_model.LinearRegression
+
+    # create ndarray of all x-values and prepend a 1 in each row
+    matrix = []
+    for i in range(len(data)):
+        row = [1 - data[i][0]]
+        for j in range(len(data[i])):
+            # append x-value to row
+            row.append(data[i][0])
+        # append row to matrix
+        matrix.append(row)
+    
+    multivar_matrix = np.array(matrix)
+
+    print(multivar_matrix)
+
+    # the result vector is b in the equation Ax=b
+    result_vector = np.array([point[1] for point in data])
+
+    # rename matrices to stay consistent with math equations below
+    x, y = multivar_matrix, result_vector
+
+    # calculate (XTX)^-1 and XTY
+    xtx_inv = np.linalg.inv(np.matmul(x.transpose(), x))
+    xty = np.matmul(x.transpose(), y)
+
+    # multiply these matrices to get the weight vector
+    weights = np.matmul(xtx_inv, xty)
+
+    return weights
+
+
 def poly_eval(x: float, weights: list) -> float:
     """
     Evaluate the polynomial described by `weights` at `x`
@@ -293,4 +341,5 @@ if __name__ == "__main__":
 
     # compute the LMS weights and plot the fit against the dataset
     weight_vector = lms(dataset, FIT_DEGREE)
+    # weight_vector = multivar_linear_regression(dataset)
     plot_fit(A, B, dataset, weight_vector, weights)

@@ -32,7 +32,7 @@ def create_dataset(games):
     data = []
 
     for game in games:
-        board = game.board()
+        # board = game.board()
 
         # Get header information if available
         result = game.headers.get('Result')
@@ -41,13 +41,13 @@ def create_dataset(games):
 
         previous_eval = None  # To store the previous evaluation
 
+        # move_number is the number of half-moves
+        move_number = 0
         for node in game.mainline():
-            move = node.move
-            move_san = board.san(move)
-            move_number = board.ply()
+            move_san = node.san()
 
             # Determine if the move was played by White or Black
-            if board.turn == chess.WHITE:
+            if move_number % 2 == 0:
                 player = 'White'
             else:
                 player = 'Black'
@@ -58,8 +58,8 @@ def create_dataset(games):
 
             # Calculate cp_loss (change in evaluation from the previous move)
             # (usually when centipawn loss is calculated it's always a positive number, but here it makes sense to keep negative centipawn loss for white if we're going w/ absolute_game_result like they did in the paper
-            #
-            cp_loss = stockfish_eval - previous_eval if previous_eval is not None else None
+            # if there is no previous eval, the centipawn loss is 0
+            cp_loss = stockfish_eval - previous_eval if previous_eval is not None else 0
 
             # Update the previous_eval for the next iteration
             previous_eval = stockfish_eval
@@ -98,13 +98,28 @@ def create_dataset(games):
                 'cp_loss': cp_loss
             })
 
-            board.push(move)
+            move_number += 1
 
     return pd.DataFrame(data)
 
-pgn_file_path = 'drive/MyDrive/db2k.pgn' # just use whatever your path is to the pgn
+# pgn_file_path = 'drive/MyDrive/db2k.pgn' # just use whatever your path is to the pgn
+pgn_file_path = 'annotated/db2k.pgn' # just use whatever your path is to the pgn
+
+print("parsing PGN files")
 games, games_missing_headers = parse_pgn_file(pgn_file_path)
 
+print("creating dataset")
 # Create the dataset w/out the games with missing headers
-dataset = create_dataset(games)
+# using smaller subset of games for faster testing
+dataset = create_dataset(games[:250])
+# dataset = create_dataset(games)
 print(dataset.head())
+
+"""
+obj = dataset.loc[0]
+print(obj)
+print(f"move: {obj['Move']}")
+print(f"cp loss: {obj['cp_loss']}")
+"""
+
+# perform linear regression on representative variables and graph R^2
